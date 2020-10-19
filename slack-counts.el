@@ -46,36 +46,14 @@
    (mpims :initarg :mpims :type (or null list) :initform nil)
    (ims :initarg :ims :type (or null list) :initform nil)))
 
-(cl-defmethod slack-counts-summary ((this slack-counts))
-  (with-slots (threads channels mpims ims) this
-    (cl-labels
-        ((counts-summary (counts)
-                         (let ((total-count 0)
-                               (unreads nil))
-                           (cl-loop for count in counts
-                                    do (with-slots (has-unreads mention-count) count
-                                         (cl-incf total-count mention-count)
-                                         (if (and has-unreads
-                                                  (null unreads))
-                                             (setq unreads t))))
-                           (cons unreads total-count))))
-      (let ((channel-summary (counts-summary channels))
-            (mpim-summary (counts-summary mpims))
-            (im-summary (counts-summary ims)))
-        (list (cons 'thread (cons (oref threads has-unreads)
-                                  (oref threads mention-count)))
-              (cons 'channel channel-summary)
-              (cons 'mpim mpim-summary)
-              (cons 'im im-summary))))))
-
-(defun slack-group-ignore-for-count (id groups team ignored)
-  "should this channel be ignored for counts"
+(defun slack-counts-group-ignore (id groups team ignored-names)
+  "should this channel/group ID be ignored for counts"
   (when-let* ((group (gethash id groups))
               (group-name (oref group name))
               (team-name (oref team name)))
-    (--any (s-match it (format "%s - %s" team-name group-name)) ignored)))
+    (--any (s-match it (format "%s - %s" team-name group-name)) ignored-names)))
 
-(cl-defmethod slack-counts-summary-filtered ((this slack-counts) (team slack-team) ignored)
+(cl-defmethod slack-counts-summary ((this slack-counts) &optional team ignored-names)
   (with-slots (threads channels mpims ims) this
     (cl-labels
         ((counts-summary (counts)
@@ -83,11 +61,12 @@
                                (unreads nil))
                            (cl-loop for count in counts
                                     do (with-slots (has-unreads mention-count id) count
-                                         (unless (or (slack-group-ignore-for-count id (oref team groups) team ignored)
-                                                   (slack-group-ignore-for-count id (oref team channels) team ignored))
+                                         (when (and team
+                                                  (not (or (slack-counts-group-ignore id (oref team groups) team ignored-names)
+                                                        (slack-counts-group-ignore id (oref team channels) team ignored-names))))
                                            (cl-incf total-count mention-count)
                                            (if (and has-unreads
-                                                    (null unreads))
+                                                  (null unreads))
                                                (setq unreads t)))))
                            (cons unreads total-count))))
       (let ((channel-summary (counts-summary channels))

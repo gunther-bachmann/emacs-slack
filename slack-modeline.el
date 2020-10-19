@@ -107,7 +107,7 @@
 (defun slack-team-counts-summary (team)
   (with-slots (counts) team
     (if counts
-        (let* ((summary (slack-counts-summary-filtered counts team slack-modeline-filter))
+        (let* ((summary (slack-counts-summary counts team slack-modeline-filter))
                (unreads nil)
                (count 0)
                (thread (cdr (cl-assoc 'thread summary))))
