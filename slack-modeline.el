@@ -38,6 +38,11 @@
   :type 'function
   :group 'slack)
 
+(defcustom slack-modeline-filter nil
+  "List of regular expression, filtering channels/groups not to count"
+  :type 'list
+  :group 'slack)
+
 (defface slack-modeline-has-unreads-face
   '((t (:weight bold :foreground "#d33682")))
   "Face used to team has unreads message in modeline"
@@ -102,7 +107,7 @@
 (defun slack-team-counts-summary (team)
   (with-slots (counts) team
     (if counts
-        (let* ((summary (slack-counts-summary counts))
+        (let* ((summary (slack-counts-summary-filtered counts team slack-modeline-filter))
                (unreads nil)
                (count 0)
                (thread (cdr (cl-assoc 'thread summary))))
