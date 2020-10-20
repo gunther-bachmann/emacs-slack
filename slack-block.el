@@ -50,34 +50,35 @@
   (format "Implement `slack-block-to-string' for %S" (oref this payload)))
 
 (defun slack-create-layout-block (payload)
-  (let ((type (plist-get payload :type)))
-    (cond
-     ((string= "section" type)
-      (slack-create-section-layout-block payload))
-     ((string= "divider" type)
-      (slack-create-divider-layout-block payload))
-     ((string= "image" type)
-      (slack-create-image-layout-block payload))
-     ((string= "actions" type)
-      (slack-create-actions-layout-block payload))
-     ((string= "context" type)
-      (slack-create-context-layout-block payload))
-     ((string= "rich_text" type)
-      (slack-create-rich-text-block payload))
-     (t (make-instance 'slack-layout-block
-                       :type type
-                       :payload payload))
-     ;; ;; TODO https://api.slack.com/reference/block-kit/blocks#file
-     ;; ((string= "file" type)
-     ;;  (message "TODO: %S" payload)
-     ;;  nil
-     ;;  )
-     ;; ;; TODO https://api.slack.com/reference/block-kit/blocks#input
-     ;; ((string= "input" type)
-     ;;  (message "TODO: %S" payload)
-     ;;  nil
-     ;;  )
-     )))
+  (ignore-errors
+    (let ((type (plist-get payload :type)))
+      (cond
+       ((string= "section" type)
+        (slack-create-section-layout-block payload))
+       ((string= "divider" type)
+        (slack-create-divider-layout-block payload))
+       ((string= "image" type)
+        (slack-create-image-layout-block payload))
+       ((string= "actions" type)
+        (slack-create-actions-layout-block payload))
+       ((string= "context" type)
+        (slack-create-context-layout-block payload))
+       ((string= "rich_text" type)
+        (slack-create-rich-text-block payload))
+       (t (make-instance 'slack-layout-block
+                         :type type
+                         :payload payload))
+       ;; ;; TODO https://api.slack.com/reference/block-kit/blocks#file
+       ;; ((string= "file" type)
+       ;;  (message "TODO: %S" payload)
+       ;;  nil
+       ;;  )
+       ;; ;; TODO https://api.slack.com/reference/block-kit/blocks#input
+       ;; ((string= "input" type)
+       ;;  (message "TODO: %S" payload)
+       ;;  nil
+       ;;  )
+       ))))
 
 ;; Rich Text Blocks
 ;; [Changes to message objects on the way to support WYSIWYG | Slack](https://api.slack.com/changelog/2019-09-what-they-see-is-what-you-get-and-more-and-less)
